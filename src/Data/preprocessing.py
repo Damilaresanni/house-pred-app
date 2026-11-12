@@ -40,8 +40,9 @@ def duplicate(dataFrame):
 def drop_features():
     pass
 
-def find_null_features(df) -> tuple[list[str],list[str]]: 
+def find_null_features(df):
     
+    df = df.copy()
     numerical_null_features = df.select_dtypes(
     include="number"
         ).columns[df.select_dtypes(include="number").isnull().any()].tolist()
@@ -56,11 +57,26 @@ def find_null_features(df) -> tuple[list[str],list[str]]:
     ]
   
 
-    return numerical_null_features, categorical_null_features
+    return df, numerical_null_features, categorical_null_features
         
         
         
     
-def handle_null_values(numerical):
-    pass
+def handle_null_values(df,numerical_null_values, categorical_null_values):
     
+    mean_imputer = SimpleImputer(strategy='mean')
+    df[[numerical_null_values]] = mean_imputer.fit_transform(df[[numerical_null_values]])
+    
+    return df
+      
+      
+      
+      
+      
+def preprocess_pipeline(filepath:str):
+    df = load_data(filepath)
+    df,numerical_null_features, categorical_null_features = find_null_features(df)
+    df = handle_null_values(df,numerical_null_features, categorical_null_features)
+    
+    df.to_csv("/home/fidisroxy/development/house-app/house-pred-app/ml/data/processed")
+    return df
