@@ -25,7 +25,7 @@ X = df.drop(
 y = df[target]
 
 # split the dataset into train and test splits
-X_train, X_test, y_test = train_test_split(
+X_train, X_test,y_train, y_test = train_test_split(
     
     X, y, test_size=0.3,
     random_state=42
@@ -57,3 +57,13 @@ preprocessor = ColumnTransformer([
     ("numeric", numeric_pipeline, numeric_features),
     ("categorical", categorical_pipeline, categorical_features)
 ])
+
+
+# train the linear regression model
+
+model = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', LinearRegression())
+])
+
+model.fit(X_train, y_train)
