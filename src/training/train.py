@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import joblib
+from math import sqrt
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
@@ -12,6 +14,7 @@ from sklearn.metrics import(
     r2_score
 )
 
+from sklearn.dummy import DummyRegressor
 
 
 FILEPATH = "/home/fidisroxy/development/house-app/house-pred-app/ml/data/processed/uk_housing_data.csv"
@@ -23,7 +26,9 @@ df = file.copy()
 target = "saleEstimate_currentPrice"
 df = df.dropna(subset=[target])
 features_to_drop = ['rentEstimate_upperPrice','rentEstimate_lowerPrice',
-            'rentEstimate_currentPrice', 'saleEstimate_upperPrice','saleEstimate_lowerPrice']
+            'rentEstimate_currentPrice', 'saleEstimate_upperPrice','saleEstimate_lowerPrice', 'saleEstimate_confidenceLevel',
+            'saleEstimate_ingestedAt', 'saleEstimate_valueChange.numericChange', 'saleEstimate_valueChange.percentageChange',""
+            'saleEstimate_valueChange.saleDate', 'history_price', 'history_date', 'history_price', 'history_percentageChange', 'history_numericChange', "saleEstimate_currentPrice"]
 X = df.drop(
     columns=features_to_drop,
     errors= "ignore"
@@ -84,6 +89,19 @@ results = pd.DataFrame({
 })
 print(results)
 
+
+
+
+
+baseline = DummyRegressor(strategy="mean")
+
+baseline.fit(X_train, y_train)
+predictions = baseline.predict(X_test)
+baseline_mae = mean_absolute_error(y_test,predictions)
+
+
+print(f"Mean baseline MAE: {baseline_mae:,.2f}")
+
 print("***************************")
 print("***************************")
 print("***************************")
@@ -91,9 +109,8 @@ print("\n")
 
 mae = mean_absolute_error(y_test,y_pred)
 
-rmse = np.sqrt(
-    mean_squared_error(y_test,y_pred)
-)
+rmse = sqrt(mean_squared_error(y_test,y_pred))
+
 
 r2 = r2_score(y_test, y_pred)
 
@@ -103,3 +120,5 @@ print(f"RMSE: {rmse:,.2f}")
 print(f"R_2_SCORE: {r2: ,.2f}")
 
 
+
+joblib.dump(model, "/home/fidisroxy/development/house-app/house-pred-app/ml/models/ln_reg.pkl")
